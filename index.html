@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Inventory System</title>
+</head>
+<body>
+
+<h2>Inventory Entry</h2>
+
+<select id="languageSelect">
+  <option value="en-IN">English</option>
+  <option value="hi-IN">Hindi</option>
+</select>
+
+<br><br>
+
+<input type="text" id="itemName" placeholder="Item Name">
+<button onclick="startSpeech('itemName')">🎤</button>
+<br><br>
+
+<input type="text" id="category" placeholder="Category">
+<button onclick="startSpeech('category')">🎤</button>
+<br><br>
+
+<input type="number" id="quantity" placeholder="Quantity">
+<br><br>
+
+<textarea id="description" placeholder="Description"></textarea>
+<button onclick="startSpeech('description')">🎤</button>
+<br><br>
+
+<input type="file" id="imageInput" accept="image/*">
+<br><br>
+
+<button onclick="submitData()">Submit</button>
+
+<script>
+
+const scriptURL = "https://script.google.com/macros/s/AKfycbwLNR9cpQf_IkAWTqlxreGapw26rN-6vNl9IBQeNReg3bC6MH_Hvt5wczywEZmBo1mpWw/exec";
+
+function startSpeech(fieldId) {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = document.getElementById("languageSelect").value;
+  recognition.start();
+  
+  recognition.onresult = function(event) {
+    document.getElementById(fieldId).value = event.results[0][0].transcript;
+  };
+}
+
+function submitData() {
+  const file = document.getElementById("imageInput").files[0];
+  
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  
+  reader.onload = function() {
+    const base64Image = reader.result.split(",")[1];
+    
+    fetch(scriptURL, {
+      method: "POST",
+      body: JSON.stringify({
+        itemName: document.getElementById("itemName").value,
+        category: document.getElementById("category").value,
+        quantity: document.getElementById("quantity").value,
+        description: document.getElementById("description").value,
+        language: document.getElementById("languageSelect").value,
+        image: base64Image,
+        imageType: file.type,
+        imageName: file.name
+      })
+    })
+    .then(response => response.json())
+    .then(data => alert("Saved Successfully"))
+    .catch(error => alert("Error"));
+  };
+}
+
+</script>
+
+</body>
+</html>
