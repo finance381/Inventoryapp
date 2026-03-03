@@ -2,38 +2,153 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.card {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+h2 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  margin-bottom: 15px;
+  transition: 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+}
+
+textarea {
+  resize: none;
+  height: 80px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mic-btn {
+  background: #f1f3f5;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.mic-btn:hover {
+  background: #e2e6ea;
+}
+
+.submit-btn {
+  width: 100%;
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submit-btn:hover {
+  background: #5a67d8;
+}
+
+.submit-btn:disabled {
+  background: grey;
+  cursor: not-allowed;
+}
+
+.success {
+  text-align: center;
+  color: green;
+  margin-top: 10px;
+  font-size: 14px;
+}
+</style>
 </head>
+
 <body>
 
-<h2>Inventory Entry</h2>
+<div class="card">
+  <h2>Inventory Entry</h2>
 
-<select id="languageSelect">
-  <option value="en-IN">English</option>
-  <option value="hi-IN">Hindi</option>
-</select>
+  <label>Language</label>
+  <select id="languageSelect">
+    <option value="en-IN">English</option>
+    <option value="hi-IN">Hindi</option>
+  </select>
 
-<br><br>
+  <label>Item Name</label>
+  <div class="row">
+    <input type="text" id="itemName" placeholder="Enter item name">
+    <button class="mic-btn" onclick="startSpeech('itemName')">🎤</button>
+  </div>
 
-<input type="text" id="itemName" placeholder="Item Name">
-<button onclick="startSpeech('itemName')">🎤</button>
-<br><br>
+  <label>Category</label>
+  <div class="row">
+    <input type="text" id="category" placeholder="Enter category">
+    <button class="mic-btn" onclick="startSpeech('category')">🎤</button>
+  </div>
 
-<input type="text" id="category" placeholder="Category">
-<button onclick="startSpeech('category')">🎤</button>
-<br><br>
+  <label>Quantity</label>
+  <input type="number" id="quantity" placeholder="Enter quantity">
 
-<input type="number" id="quantity" placeholder="Quantity">
-<br><br>
+  <label>Description</label>
+  <div class="row">
+    <textarea id="description" placeholder="Enter description"></textarea>
+    <button class="mic-btn" onclick="startSpeech('description')">🎤</button>
+  </div>
 
-<textarea id="description" placeholder="Description"></textarea>
-<button onclick="startSpeech('description')">🎤</button>
-<br><br>
+  <label>Upload Image</label>
+  <input type="file" id="imageInput" accept="image/*">
 
-<input type="file" id="imageInput" accept="image/*">
-<br><br>
+  <button class="submit-btn" id="submitBtn" onclick="submitData()">Submit</button>
 
-<button onclick="submitData()">Submit</button>
+  <div class="success" id="successMsg"></div>
+</div>
 
 <script>
 
@@ -50,14 +165,24 @@ function startSpeech(fieldId) {
 }
 
 function submitData() {
+  const btn = document.getElementById("submitBtn");
+  const successMsg = document.getElementById("successMsg");
   const file = document.getElementById("imageInput").files[0];
-  
+
+  if (!file) {
+    alert("Please upload an image.");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "Saving...";
+
   const reader = new FileReader();
   reader.readAsDataURL(file);
-  
+
   reader.onload = function() {
     const base64Image = reader.result.split(",")[1];
-    
+
     fetch(scriptURL, {
       method: "POST",
       body: JSON.stringify({
@@ -71,9 +196,18 @@ function submitData() {
         imageName: file.name
       })
     })
-    .then(response => response.json())
-    .then(data => alert("Saved Successfully"))
-    .catch(error => alert("Error"));
+    .then(res => res.json())
+    .then(data => {
+      successMsg.innerText = "Saved successfully!";
+      btn.disabled = false;
+      btn.innerText = "Submit";
+      document.querySelector("form")?.reset();
+    })
+    .catch(err => {
+      alert("Error saving data.");
+      btn.disabled = false;
+      btn.innerText = "Submit";
+    });
   };
 }
 
