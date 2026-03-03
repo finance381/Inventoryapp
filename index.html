@@ -290,12 +290,22 @@ function startSpeech(fieldId){
 
 function submitData(){
   const btn = document.getElementById("submitBtn");
-  btn.disabled=true;
-  btn.innerText="Saving...";
+  btn.disabled = true;
+  btn.innerText = "Saving...";
 
-  const file = document.getElementById("imageInput").files[0];
+  const cameraFile = document.getElementById("cameraInput")?.files[0];
+  const galleryFile = document.getElementById("galleryInput")?.files[0];
+  const file = cameraFile || galleryFile;
+
+  if (!file) {
+    alert("Please upload or capture an image.");
+    btn.disabled = false;
+    btn.innerText = "Save Item";
+    return;
+  }
 
   compressImage(file,function(compressedImage){
+
     fetch(scriptURL,{
       method:"POST",
       body:JSON.stringify({
@@ -310,13 +320,24 @@ function submitData(){
         imageName:"inventory.jpg"
       })
     })
-    .then(res=>res.json())
-    .then(()=>{
-      showToast();
-      generateID();
-      btn.disabled=false;
-      btn.innerText="Save Item";
+    .then(res => res.json())
+    .then(data => {
+      if(data.status === "success"){
+        showToast();
+        generateID();
+      } else {
+        alert("Server Error: " + data.message);
+      }
+    })
+    .catch(err => {
+      alert("Connection Error");
+      console.error(err);
+    })
+    .finally(()=>{
+      btn.disabled = false;
+      btn.innerText = "Save Item";
     });
+
   });
 }
 
