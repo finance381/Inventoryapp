@@ -198,7 +198,24 @@ textarea { resize: none; height: 90px; }
     </div>
 
     <label>Upload Image</label>
-    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+
+<div class="row">
+  <button type="button" class="mic-btn" onclick="document.getElementById('cameraInput').click()">📷 Take Photo</button>
+  <button type="button" class="mic-btn" onclick="document.getElementById('galleryInput').click()">🖼 Gallery</button>
+</div>
+
+<input type="file"
+       id="cameraInput"
+       accept="image/*"
+       capture="environment"
+       style="display:none"
+       onchange="previewImage(event)">
+
+<input type="file"
+       id="galleryInput"
+       accept="image/*"
+       style="display:none"
+       onchange="previewImage(event)">
     <img id="imagePreview" class="preview">
 
     <button class="submit-btn" id="submitBtn" onclick="submitData()">Save Item</button>
