@@ -3,212 +3,310 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inventory System</title>
+<title>Inventory Management</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+:root {
+  --primary: #6366f1;
+  --bg-light: #f8fafc;
+  --card-light: #ffffff;
+  --text-light: #1e293b;
+
+  --bg-dark: #0f172a;
+  --card-dark: #1e293b;
+  --text-dark: #f1f5f9;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  transition: 0.3s;
+}
+
+.light {
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+
+.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
 }
 
 .card {
-  background: white;
-  width: 100%;
-  max-width: 500px;
   padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
 }
 
-h2 {
-  margin-top: 0;
-  font-weight: 600;
+.dark .card {
+  background: rgba(30,41,59,0.8);
 }
 
-label {
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.toggle-btn {
+  cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: none;
+  background: var(--primary);
+  color: white;
 }
 
 input, textarea, select {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
   margin-bottom: 15px;
-  transition: 0.2s;
+  font-size: 14px;
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
-}
-
-textarea {
-  resize: none;
-  height: 80px;
-}
+textarea { resize: none; height: 90px; }
 
 .row {
   display: flex;
   gap: 10px;
-  align-items: center;
 }
 
 .mic-btn {
-  background: #f1f3f5;
+  padding: 12px;
+  border-radius: 12px;
   border: none;
-  padding: 10px 12px;
-  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.mic-btn:hover {
-  background: #e2e6ea;
 }
 
 .submit-btn {
   width: 100%;
-  background: #667eea;
-  color: white;
+  padding: 14px;
+  border-radius: 14px;
   border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.submit-btn:hover {
-  background: #5a67d8;
 }
 
 .submit-btn:disabled {
   background: grey;
-  cursor: not-allowed;
 }
 
-.success {
-  text-align: center;
-  color: green;
-  margin-top: 10px;
-  font-size: 14px;
+.preview {
+  margin-bottom: 15px;
+  max-height: 150px;
+  border-radius: 12px;
+  display: none;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #10b981;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  display: none;
+}
+
+.login-screen {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-box {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  width: 300px;
 }
 </style>
 </head>
 
-<body>
+<body class="light">
 
-<div class="card">
-  <h2>Inventory Entry</h2>
-
-  <label>Language</label>
-  <select id="languageSelect">
-    <option value="en-IN">English</option>
-    <option value="hi-IN">Hindi</option>
-  </select>
-
-  <label>Item Name</label>
-  <div class="row">
-    <input type="text" id="itemName" placeholder="Enter item name">
-    <button class="mic-btn" onclick="startSpeech('itemName')">🎤</button>
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h3>Internal Access</h3>
+    <input type="password" id="password" placeholder="Enter password">
+    <button class="submit-btn" onclick="login()">Login</button>
   </div>
-
-  <label>Category</label>
-  <div class="row">
-    <input type="text" id="category" placeholder="Enter category">
-    <button class="mic-btn" onclick="startSpeech('category')">🎤</button>
-  </div>
-
-  <label>Quantity</label>
-  <input type="number" id="quantity" placeholder="Enter quantity">
-
-  <label>Description</label>
-  <div class="row">
-    <textarea id="description" placeholder="Enter description"></textarea>
-    <button class="mic-btn" onclick="startSpeech('description')">🎤</button>
-  </div>
-
-  <label>Upload Image</label>
-  <input type="file" id="imageInput" accept="image/*">
-
-  <button class="submit-btn" id="submitBtn" onclick="submitData()">Submit</button>
-
-  <div class="success" id="successMsg"></div>
 </div>
+
+<div class="container" id="app" style="display:none;">
+  <div class="card">
+
+    <div class="header">
+      <div class="logo">📦 Inventory Manager</div>
+      <button class="toggle-btn" onclick="toggleMode()">Toggle Mode</button>
+    </div>
+
+    <br>
+
+    <label>Language</label>
+    <select id="languageSelect">
+      <option value="en-IN">English</option>
+      <option value="hi-IN">Hindi</option>
+    </select>
+
+    <label>Inventory ID</label>
+    <input type="text" id="inventoryId" readonly>
+
+    <label>Item Name</label>
+    <div class="row">
+      <input type="text" id="itemName">
+      <button class="mic-btn" onclick="startSpeech('itemName')">🎤</button>
+    </div>
+
+    <label>Category</label>
+    <div class="row">
+      <input type="text" id="category">
+      <button class="mic-btn" onclick="startSpeech('category')">🎤</button>
+    </div>
+
+    <label>Quantity</label>
+    <input type="number" id="quantity">
+
+    <label>Description</label>
+    <div class="row">
+      <textarea id="description"></textarea>
+      <button class="mic-btn" onclick="startSpeech('description')">🎤</button>
+    </div>
+
+    <label>Upload Image</label>
+    <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+    <img id="imagePreview" class="preview">
+
+    <button class="submit-btn" id="submitBtn" onclick="submitData()">Save Item</button>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved Successfully</div>
 
 <script>
 
 const scriptURL = "https://script.google.com/macros/s/AKfycbwLNR9cpQf_IkAWTqlxreGapw26rN-6vNl9IBQeNReg3bC6MH_Hvt5wczywEZmBo1mpWw/exec";
+const APP_PASSWORD = "12345"; // Change this
 
-function startSpeech(fieldId) {
+function login(){
+  if(document.getElementById("password").value === APP_PASSWORD){
+    document.getElementById("loginScreen").style.display="none";
+    document.getElementById("app").style.display="block";
+    generateID();
+  } else {
+    alert("Wrong password");
+  }
+}
+
+function toggleMode(){
+  document.body.classList.toggle("dark");
+  document.body.classList.toggle("light");
+}
+
+function generateID(){
+  document.getElementById("inventoryId").value =
+    "INV-" + Date.now().toString().slice(-6);
+}
+
+function previewImage(event){
+  const reader = new FileReader();
+  reader.onload = function(){
+    const img = document.getElementById("imagePreview");
+    img.src = reader.result;
+    img.style.display = "block";
+  }
+  reader.readAsDataURL(event.target.files[0]);
+}
+
+function compressImage(file, callback){
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(event){
+    const img = new Image();
+    img.src = event.target.result;
+    img.onload = function(){
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const maxWidth = 800;
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      callback(canvas.toDataURL("image/jpeg",0.7));
+    }
+  }
+}
+
+function startSpeech(fieldId){
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.lang = document.getElementById("languageSelect").value;
   recognition.start();
-  
-  recognition.onresult = function(event) {
+  recognition.onresult = function(event){
     document.getElementById(fieldId).value = event.results[0][0].transcript;
   };
 }
 
-function submitData() {
+function submitData(){
   const btn = document.getElementById("submitBtn");
-  const successMsg = document.getElementById("successMsg");
+  btn.disabled=true;
+  btn.innerText="Saving...";
+
   const file = document.getElementById("imageInput").files[0];
 
-  if (!file) {
-    alert("Please upload an image.");
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerText = "Saving...";
-
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-
-  reader.onload = function() {
-    const base64Image = reader.result.split(",")[1];
-
-    fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify({
-        itemName: document.getElementById("itemName").value,
-        category: document.getElementById("category").value,
-        quantity: document.getElementById("quantity").value,
-        description: document.getElementById("description").value,
-        language: document.getElementById("languageSelect").value,
-        image: base64Image,
-        imageType: file.type,
-        imageName: file.name
+  compressImage(file,function(compressedImage){
+    fetch(scriptURL,{
+      method:"POST",
+      body:JSON.stringify({
+        inventoryId:document.getElementById("inventoryId").value,
+        itemName:document.getElementById("itemName").value,
+        category:document.getElementById("category").value,
+        quantity:document.getElementById("quantity").value,
+        description:document.getElementById("description").value,
+        language:document.getElementById("languageSelect").value,
+        image:compressedImage.split(",")[1],
+        imageType:"image/jpeg",
+        imageName:"inventory.jpg"
       })
     })
-    .then(res => res.json())
-    .then(data => {
-      successMsg.innerText = "Saved successfully!";
-      btn.disabled = false;
-      btn.innerText = "Submit";
-      document.querySelector("form")?.reset();
-    })
-    .catch(err => {
-      alert("Error saving data.");
-      btn.disabled = false;
-      btn.innerText = "Submit";
+    .then(res=>res.json())
+    .then(()=>{
+      showToast();
+      generateID();
+      btn.disabled=false;
+      btn.innerText="Save Item";
     });
-  };
+  });
+}
+
+function showToast(){
+  const toast=document.getElementById("toast");
+  toast.style.display="block";
+  setTimeout(()=>toast.style.display="none",2000);
 }
 
 </script>
